@@ -8,6 +8,10 @@ import smbus
 import math
 import time
 
+#import rosbag
+from std_msgs.msg import String
+from sensor_msgs.msg import LaserScan
+
 #https://github.com/ControlEverythingCommunity/L3GD20 ALSO HAS C++ LIB
 
 #source ./devel/setup.bash
@@ -19,6 +23,9 @@ import time
 
 #source ./devel/setup.bash
 #rosrun beginner_tutorials gyro_tf.py
+
+#https://www.theconstructsim.com/read-laserscan-data/
+
 
 bus = smbus.SMBus(1)
 address = 0x6B
@@ -49,6 +56,13 @@ def zGyro():
 
 
 
+
+def callback(msg):
+    #print "Center: %f" % (msg.ranges[180])
+    print "inc: %f" % (msg.angle_increment)
+
+#bag = rosbag.Bag('test.bag', 'w')
+
 if __name__=="__main__":
 	rospy.init_node('dynamic_tf_broadcaster')
 	br = tf.TransformBroadcaster()
@@ -58,6 +72,8 @@ if __name__=="__main__":
 	bus.write_byte_data(address, 0x23, 0x30)
 	time.sleep(0.5)
 	zAngle = 0.0
+	
+	
 	while not rospy.is_shutdown():
 		rate.sleep()
 		gyro = (((zGyro())/fqz)/720)
@@ -65,6 +81,12 @@ if __name__=="__main__":
 			zAngle = zAngle + gyro #/(fqz/1.0)
 		quaternion = tf.transformations.quaternion_from_euler(0.0, 1.5, zAngle)
 		br.sendTransform((0.0, 0.0, 0.0), quaternion, rospy.Time.now(),"point_cloud", "map")
-		print "%d : %d" % (gyro, zAngle)
+		
+		rospy.Subscriber("/scan", LaserScan, callback) #https://www.theconstructsim.com/read-laserscan-data/
+		#rospy.spin()
+    		
+		#bag.write('dynamic_tf_broadcaster')
+		#print "Test: %d" % ()
+		#print "%d : %d" % (gyro, zAngle)
 		#print "(%d, %d, %d)" % (xGyro(),yGyro(),zGyro())
 		
