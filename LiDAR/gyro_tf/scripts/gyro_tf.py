@@ -11,6 +11,9 @@ import time
 #import rosbag
 from std_msgs.msg import String
 from sensor_msgs.msg import LaserScan
+from sensor_msgs.msg import PointCloud2
+from sensor_msgs.msg import PointCloud
+
 
 #https://github.com/ControlEverythingCommunity/L3GD20 ALSO HAS C++ LIB
 
@@ -55,11 +58,15 @@ def zGyro():
 	return zGyro
 
 
-
-
 def callback(msg):
-    #print "Center: %f" % (msg.ranges[180])
-    print "inc: %f" % (msg.angle_increment)
+	current_far = 0.0
+	#for value in msg.ranges:
+		#if value > current_far:
+			#print "Far: %f" % (current_far)
+			#current_far = value
+	#tf_shift = current_far
+    	#print "Center: %f" % (msg.ranges[180])
+    	#print "inc: %f" % (msg.angle_increment)
 
 #bag = rosbag.Bag('test.bag', 'w')
 
@@ -72,7 +79,8 @@ if __name__=="__main__":
 	bus.write_byte_data(address, 0x23, 0x30)
 	time.sleep(0.5)
 	zAngle = 0.0
-	
+
+	#pub = rospy.Publisher("/jeffrey_scan", LaserScan, queue_size=10)
 	
 	while not rospy.is_shutdown():
 		rate.sleep()
@@ -80,9 +88,10 @@ if __name__=="__main__":
 		if (zGyro()/fqz) >= 1.0 or (zGyro()/fqz) <= -1.0:
 			zAngle = zAngle + gyro #/(fqz/1.0)
 		quaternion = tf.transformations.quaternion_from_euler(0.0, 1.5, zAngle)
-		br.sendTransform((0.0, 0.0, 0.0), quaternion, rospy.Time.now(),"point_cloud", "map")
-		
 		rospy.Subscriber("/scan", LaserScan, callback) #https://www.theconstructsim.com/read-laserscan-data/
+		br.sendTransform((0.0, 0.0, 0.0), quaternion, rospy.Time.now(),"point_cloud", "map")
+		#br.sendTransform((0.0, 0.0, 0.0), (0.0,0.0,0.0,1.0), rospy.Time.now(),"jef", "map")
+		
 		#rospy.spin()
     		
 		#bag.write('dynamic_tf_broadcaster')
