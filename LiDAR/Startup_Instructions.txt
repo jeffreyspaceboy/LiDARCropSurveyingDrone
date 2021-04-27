@@ -1,0 +1,30 @@
+
+
+source ./devel/setup.bash
+sudo ifconfig eth0 192.168.2.100
+roslaunch sick_scan sick_tim_7xx.launch
+
+source ./devel/setup.bash
+rosrun rviz rviz
+
+source ./devel/setup.bash
+rosrun beginner_tutorials gyro_tf.py
+
+source ./devel/setup.bash
+rosrun beginner_tutorials data_store.py
+
+
+
+
+
+
+
+
+#https://github.com/ControlEverythingCommunity/L3GD20 ALSO HAS C++ LIB
+#https://www.theconstructsim.com/read-laserscan-data/
+
+
+sudo nano /etc/systemd/system/foo.service
+sudo systemctl enable foo
+sudo systemctl start foo
+dmesg
